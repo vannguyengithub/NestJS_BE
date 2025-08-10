@@ -1,20 +1,32 @@
-import { Injectable } from '@nestjs/common';
-// import { CreateUserDto } from './dto/create-user.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './schemas/user.schema';
-import { Model } from 'mongoose';
+import { User, UserDocument } from './schemas/user.schema';
+import mongoose, { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
+import { genSaltSync, hashSync } from 'bcryptjs';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
+  constructor(
+    @InjectModel(User.name) private readonly userModel: Model<User>,
+  ) {}
 
-  async create(email: string, password: string, name: string) {
+  private getHashPassword(password: string): string {
+    const salt: string = genSaltSync(10);
+    const hash: string = hashSync(password, salt);
+    return hash;
+  }
+
+  async create(createUserDto: CreateUserDto) {
+    const hashedPassword: string = this.getHashPassword(createUserDto.password);
+
     const user = await this.userModel.create({
-      email,
-      password,
-      name,
+      email: createUserDto.email,
+      password: hashedPassword,
+      name: createUserDto.name,
     });
+
     return user;
   }
 
@@ -22,8 +34,15 @@ export class UsersService {
     return `This action returns all users`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('Invalid user ID');
+    }
+    const user = await this.userModel.findById(id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
