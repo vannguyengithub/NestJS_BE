@@ -5,8 +5,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-// import { APP_GUARD } from '@nestjs/core';
-// import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { softDeletePlugin } from 'soft-delete-plugin-mongoose/dist/src';
+import { CompaniesModule } from './companies/companies.module';
 
 @Module({
   imports: [
@@ -14,6 +14,12 @@ import { AuthModule } from './auth/auth.module';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         uri: configService.get<string>('MONGO_URI'),
+        connectionFactory: (connection: any) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+          connection.plugin(softDeletePlugin);
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+          return connection;
+        },
       }),
       inject: [ConfigService],
     }),
@@ -25,14 +31,10 @@ import { AuthModule } from './auth/auth.module';
     UsersModule,
 
     AuthModule,
+
+    CompaniesModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: JwtAuthGuard,
-    // },
-  ],
+  providers: [AppService],
 })
 export class AppModule {}
