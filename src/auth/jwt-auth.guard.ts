@@ -25,6 +25,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   }
 
   handleRequest(err, user, info) {
+    console.log('<<info>>', info);
     // You can throw an exception based on either "info" or "err" arguments
     if (err || !user) {
       throw (
@@ -32,6 +33,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         new UnauthorizedException('Token is invalid or token not found Bearer')
       );
     }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return user;
   }
 }
