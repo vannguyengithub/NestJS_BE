@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { TransformInterceptor } from './core/transform.interceptor';
+import cookieParser from 'cookie-parser';
 // Load environment variables from .env file
 
 async function bootstrap() {
@@ -20,6 +21,9 @@ async function bootstrap() {
   app.setBaseViewsDir(join(__dirname, '..', 'views')); //view
   app.setViewEngine('ejs');
   app.useGlobalPipes(new ValidationPipe());
+
+  // config cookie parser
+  app.use(cookieParser());
 
   // config cors
   app.enableCors({

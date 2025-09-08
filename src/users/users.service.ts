@@ -55,8 +55,8 @@ export class UsersService {
 
   async findAll(currentPage: number, limit: number, qs: string) {
     const { filter, sort, population } = aqp(qs);
-    delete filter.page;
-    delete filter.limit;
+    delete filter.current;
+    delete filter.pageSize;
 
     const offset = (+currentPage - 1) * +limit;
     const defaultLimit = +limit ? +limit : 10;
@@ -156,5 +156,15 @@ export class UsersService {
     });
 
     return newRegister;
+  }
+
+  async updateUserToken(id: string, refreshToken: string) {
+    return this.userModel.updateOne({ _id: id }, { refreshToken });
+  }
+
+  async findUserByToken(refreshToken: string) {
+    return this.userModel.findOne({
+      refreshToken,
+    });
   }
 }
