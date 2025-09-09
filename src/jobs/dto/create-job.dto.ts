@@ -51,12 +51,12 @@ export class CreateJobDto {
   description: string;
 
   @IsNotEmpty({ message: 'StartDate không được để trống' })
-  @Transform(({ value }) => new Date(value))
+  @Transform(({ value }) => new Date(value as string))
   @IsDate({ message: 'StartDate phải là một ngày' })
   startDate: Date;
 
   @IsNotEmpty({ message: 'EndDate không được để trống' })
-  @Transform(({ value }) => new Date(value))
+  @Transform(({ value }) => new Date(value as string))
   @IsDate({ message: 'EndDate phải là một ngày' })
   endDate: Date;
 
