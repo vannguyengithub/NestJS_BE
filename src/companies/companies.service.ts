@@ -6,6 +6,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose/dist/src';
 import { IUser } from 'src/users/users.interface';
 import aqp from 'api-query-params';
+import mongoose from 'mongoose';
 
 @Injectable()
 export class CompaniesService {
@@ -55,8 +56,11 @@ export class CompaniesService {
     };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} company`;
+  findOne(id: string) {
+    if (!mongoose.Types.ObjectId.isValid(id))
+      return `Not found company with id: ${id}`;
+
+    return this.companyModel.findById(id).select('-password');
   }
 
   update(id: string, updateCompanyDto: UpdateCompanyDto, user: IUser) {
