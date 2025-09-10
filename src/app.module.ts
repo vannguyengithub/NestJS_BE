@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { softDeletePlugin } from 'soft-delete-plugin-mongoose/dist/src';
 import { CompaniesModule } from './companies/companies.module';
 import { JobsModule } from './jobs/jobs.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -36,6 +37,8 @@ import { JobsModule } from './jobs/jobs.module';
     CompaniesModule,
 
     JobsModule,
+
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
