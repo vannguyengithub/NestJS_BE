@@ -89,11 +89,20 @@ export class UsersService {
     if (!mongoose.Types.ObjectId.isValid(id))
       return `Not found user with id: ${id}`;
 
-    return await this.userModel.findOne({ _id: id }).select('-password');
+    return await this.userModel
+      .findOne({ _id: id })
+      .select('-password')
+      .populate({
+        path: 'role',
+        select: { _id: 1, name: 1 },
+      });
   }
 
   async findOneByUsername(username: string) {
-    return this.userModel.findOne({ email: username });
+    return this.userModel.findOne({ email: username }).populate({
+      path: 'role',
+      select: { _id: 1, name: 1, permissions: 1 },
+    });
   }
 
   isValidPassword(password: string, hash: string) {
@@ -118,6 +127,11 @@ export class UsersService {
   async remove(id: string, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(id))
       return `Not found user with id: ${id}`;
+
+    const foundUser = await this.userModel.findById(id);
+    if (foundUser?.email === 'nguyen.nguyen@gmail.com') {
+      throw new BadRequestException('Không thể xóa tài khoản này');
+    }
 
     await this.userModel.updateOne(
       { _id: id },

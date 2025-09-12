@@ -48,7 +48,7 @@ export class ResumesService {
   }
 
   async findAll(currentPage: number, limit: number, qs: string) {
-    const { filter, sort, population } = aqp(qs);
+    const { filter, sort, population, projection } = aqp(qs);
     delete filter.current;
     delete filter.pageSize;
 
@@ -65,6 +65,7 @@ export class ResumesService {
       // @ts-expect-error: Unreachable code error
       .sort(sort)
       .populate(population)
+      .select(projection)
       .exec();
 
     return {
@@ -87,7 +88,19 @@ export class ResumesService {
   }
 
   async findByUsers(user: IUser) {
-    return await this.resumeModel.find({ userId: user._id });
+    return await this.resumeModel
+      .find({ userId: user._id })
+      .sort({ createdAt: -1 })
+      .populate([
+        {
+          path: 'companyId',
+          select: { name: 1 },
+        },
+        {
+          path: 'jobId',
+          select: { name: 1 },
+        },
+      ]);
   }
 
   async update(id: string, status: string, user: IUser) {
