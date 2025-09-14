@@ -8,14 +8,17 @@ import { CreateUserDto, RegisterUserDto } from './dto/create-user.dto';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose/dist/src/soft-delete-model';
 import { IUser } from './users.interface';
 import aqp from 'api-query-params';
+import { USER_ROLE } from 'src/databases/sample';
+import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(UserM.name) private userModel: SoftDeleteModel<UserDocument>,
+    @InjectModel(Role.name) private roleModel: SoftDeleteModel<RoleDocument>,
   ) {}
 
-  private getHashPassword(password: string): string {
+  getHashPassword(password: string): string {
     const salt: string = genSaltSync(10);
     const hash: string = hashSync(password, salt);
     return hash;
@@ -101,7 +104,7 @@ export class UsersService {
   async findOneByUsername(username: string) {
     return this.userModel.findOne({ email: username }).populate({
       path: 'role',
-      select: { _id: 1, name: 1, permissions: 1 },
+      select: { name: 1 },
     });
   }
 
@@ -129,7 +132,7 @@ export class UsersService {
       return `Not found user with id: ${id}`;
 
     const foundUser = await this.userModel.findById(id);
-    if (foundUser?.email === 'nguyen.nguyen@gmail.com') {
+    if (foundUser && foundUser?.email === 'nguyen.nguyen@gmail.com') {
       throw new BadRequestException('Không thể xóa tài khoản này');
     }
 
@@ -157,6 +160,9 @@ export class UsersService {
       );
     }
 
+    // Fetch user role
+    const userRole = await this.roleModel.findOne({ name: USER_ROLE });
+
     const hashedPassword = this.getHashPassword(password);
 
     const newRegister = await this.userModel.create({
@@ -166,7 +172,7 @@ export class UsersService {
       age,
       gender,
       address,
-      role: 'USER',
+      role: userRole?._id,
     });
 
     return newRegister;
@@ -177,8 +183,13 @@ export class UsersService {
   }
 
   async findUserByToken(refreshToken: string) {
-    return this.userModel.findOne({
-      refreshToken,
-    });
+    return this.userModel
+      .findOne({
+        refreshToken,
+      })
+      .populate({
+        path: 'role',
+        select: { name: 1 },
+      });
   }
 }
