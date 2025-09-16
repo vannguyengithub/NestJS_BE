@@ -112,4 +112,49 @@ export class DatabasesService implements OnModuleInit {
       );
     }
   }
+
+  async syncNewPermissions() {
+    try {
+      // Get existing permissions
+      const existingPermissions = await this.permissionModel.find({});
+      const existingPaths = existingPermissions.map(
+        (p) => `${p.method}:${p.apiPath}`,
+      );
+
+      // Filter new permissions that don't exist yet
+      const newPermissions = INIT_PERMISSIONS.filter((permission) => {
+        const path = `${permission.method}:${permission.apiPath}`;
+        return !existingPaths.includes(path);
+      });
+
+      if (newPermissions.length > 0) {
+        // Insert new permissions
+        await this.permissionModel.insertMany(newPermissions);
+        console.log(`>>> Added ${newPermissions.length} new permissions`);
+
+        // Update admin role to include all permissions
+        const allPermissions = await this.permissionModel
+          .find({})
+          .select('_id');
+        await this.roleModel.updateOne(
+          { name: ADMIN_ROLE },
+          { permissions: allPermissions },
+        );
+        console.log('>>> Updated admin role with new permissions');
+
+        return {
+          message: `Successfully added ${newPermissions.length} new permissions and updated admin role`,
+          addedPermissions: newPermissions.length,
+        };
+      } else {
+        return {
+          message: 'No new permissions to add',
+          addedPermissions: 0,
+        };
+      }
+    } catch (error) {
+      console.error('Error syncing permissions:', error);
+      throw error;
+    }
+  }
 }
