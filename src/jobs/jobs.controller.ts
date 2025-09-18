@@ -26,14 +26,14 @@ export class JobsController {
   }
 
   @Get()
-  @Public()
   @ResponseMessage('Get list job with pagination')
   findAll(
     @Query('current') currentPage: string,
     @Query('pageSize') limit: string,
     @Query() qs: string,
+    @User() user: IUser,
   ) {
-    return this.jobsService.findAll(+currentPage, +limit, qs);
+    return this.jobsService.findAll(+currentPage, +limit, qs, user);
   }
 
   @Get(':id')
@@ -50,12 +50,12 @@ export class JobsController {
     @Body() updateJobDto: UpdateJobDto,
     @User() user: IUser,
   ) {
-    return this.jobsService.update(+id, updateJobDto, user);
+    return this.jobsService.update(id, updateJobDto, user);
   }
 
   @Delete(':id')
   @ResponseMessage('Delete a job')
   remove(@Param('id') id: string, @User() user: IUser) {
-    return this.jobsService.remove(+id, user);
+    return this.jobsService.remove(id, user);
   }
 }

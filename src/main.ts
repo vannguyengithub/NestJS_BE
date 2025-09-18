@@ -7,8 +7,9 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { TransformInterceptor } from './core/transform.interceptor';
 import cookieParser from 'cookie-parser';
-// Load environment variables from .env file
+import helmet from 'helmet';
 
+// Load environment variables from .env file
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
@@ -20,7 +21,11 @@ async function bootstrap() {
   app.useStaticAssets(join(__dirname, '..', 'public')); //js, css, images
   app.setBaseViewsDir(join(__dirname, '..', 'views')); //view
   app.setViewEngine('ejs');
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+    }),
+  );
 
   // config cookie parser
   app.use(cookieParser());
@@ -40,6 +45,10 @@ async function bootstrap() {
     type: VersioningType.URI,
     defaultVersion: ['1', '2'],
   });
+
+  // config helmet
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+  app.use(helmet());
 
   await app.listen(configService.get<number>('PORT') || 3000);
 }

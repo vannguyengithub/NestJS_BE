@@ -54,10 +54,16 @@ export class JobsService {
     };
   }
 
-  async findAll(currentPage: number, limit: number, qs: string) {
+  async findAll(currentPage: number, limit: number, qs: string, user: IUser) {
     const { filter, sort, population } = aqp(qs);
     delete filter.current;
     delete filter.pageSize;
+
+    // Apply company filter for HR role
+    if (user.role.name === 'HR' && user.company && user.company._id) {
+      const companyId = user.company._id.toString();
+      filter['company._id'] = companyId;
+    }
 
     const offset = (+currentPage - 1) * +limit;
     const defaultLimit = +limit ? +limit : 10;
@@ -92,14 +98,18 @@ export class JobsService {
     return this.jobModel.findById(id);
   }
 
-  async update(id: number, updateJobDto: UpdateJobDto, user: IUser) {
+  async update(id: string, updateJobDto: UpdateJobDto, user: IUser) {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return `Not found job with id: ${id}`;
+    }
+
     const updated = await this.jobModel.updateOne(
       { _id: id },
       {
         ...updateJobDto,
         updatedBy: {
           _id: user._id,
-          email: user.email,
+          name: user.name,
         },
       },
     );
@@ -107,7 +117,7 @@ export class JobsService {
     return updated;
   }
 
-  async remove(id: number, user: IUser) {
+  async remove(id: string, user: IUser) {
     if (!mongoose.Types.ObjectId.isValid(id))
       return `Not found job with id: ${id}`;
 
@@ -116,7 +126,7 @@ export class JobsService {
       {
         deletedBy: {
           _id: user._id,
-          email: user.email,
+          name: user.name,
         },
       },
     );

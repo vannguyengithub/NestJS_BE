@@ -9,6 +9,7 @@ import {
   SubscriberDocument,
 } from 'src/subscribers/schemas/subscriber.schema';
 import { Job, JobDocument } from 'src/jobs/schemas/job.schema';
+import { Cron } from '@nestjs/schedule';
 
 @Controller('mail')
 export class MailController {
@@ -24,6 +25,7 @@ export class MailController {
   @Get()
   @Public()
   @ResponseMessage('Test email')
+  @Cron('0 10 0 * * 0') // every sunday at 10:00 AM
   async handleTestEmail() {
     const subscribers = await this.subscriberModel.find({});
     for (const subscriber of subscribers) {

@@ -47,10 +47,16 @@ export class ResumesService {
     };
   }
 
-  async findAll(currentPage: number, limit: number, qs: string) {
+  async findAll(currentPage: number, limit: number, qs: string, user: IUser) {
     const { filter, sort, population, projection } = aqp(qs);
     delete filter.current;
     delete filter.pageSize;
+
+    // Apply company filter for HR role
+    if (user.role.name === 'HR' && user.company && user.company._id) {
+      const companyId = user.company._id.toString();
+      filter.companyId = companyId;
+    }
 
     const offset = (+currentPage - 1) * +limit;
     const defaultLimit = +limit ? +limit : 10;

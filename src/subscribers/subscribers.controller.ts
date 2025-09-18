@@ -47,7 +47,7 @@ export class SubscribersController {
     return this.subscribersService.findOne(id);
   }
 
-  @Patch(':id')
+  @Patch()
   @SkipCheckPermission()
   @ResponseMessage('Update a subscriber')
   update(
@@ -66,7 +66,7 @@ export class SubscribersController {
   @Post('skills')
   @ResponseMessage('Get all skills')
   @SkipCheckPermission()
-  getSkills(@User() user: IUser) {
+  getUserSkills(@User() user: IUser) {
     return this.subscribersService.getSkills(user);
   }
 }
