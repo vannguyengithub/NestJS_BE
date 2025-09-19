@@ -54,13 +54,19 @@ export class JobsService {
     };
   }
 
-  async findAll(currentPage: number, limit: number, qs: string, user: IUser) {
+  async findAll(currentPage: number, limit: number, qs: string, user?: IUser) {
     const { filter, sort, population } = aqp(qs);
     delete filter.current;
     delete filter.pageSize;
 
-    // Apply company filter for HR role
-    if (user.role.name === 'HR' && user.company && user.company._id) {
+    // Apply company filter for HR role (only if user is authenticated)
+    if (
+      user &&
+      user.role &&
+      user.role.name?.toLowerCase().trim() === 'hr' &&
+      user.company &&
+      user.company._id
+    ) {
       const companyId = user.company._id.toString();
       filter['company._id'] = companyId;
     }

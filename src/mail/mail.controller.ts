@@ -10,7 +10,10 @@ import {
 } from 'src/subscribers/schemas/subscriber.schema';
 import { Job, JobDocument } from 'src/jobs/schemas/job.schema';
 import { Cron } from '@nestjs/schedule';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('mail')
+@ApiBearerAuth()
 @Controller('mail')
 export class MailController {
   constructor(

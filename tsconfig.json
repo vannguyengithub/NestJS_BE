@@ -18,5 +18,10 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "esModuleInterop": true
-  }
+  },
+  "exclude": [
+    "documentation/**/*",
+    "node_modules",
+    "dist"
+  ]
 }

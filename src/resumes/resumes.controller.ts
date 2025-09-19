@@ -10,9 +10,12 @@ import {
 } from '@nestjs/common';
 import { ResumesService } from './resumes.service';
 import { CreateUserCvDto } from './dto/create-resume.dto';
-import { ResponseMessage, User } from 'src/decorator/customize';
+import { Public, ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('resumes')
+@ApiBearerAuth()
 @Controller('resumes')
 export class ResumesController {
   constructor(private readonly resumesService: ResumesService) {}
@@ -30,17 +33,19 @@ export class ResumesController {
   }
 
   @Get()
+  @Public()
   @ResponseMessage('Get all resumes')
   findAll(
     @Query('current') currentPage: string,
     @Query('pageSize') limit: string,
     @Query() qs: string,
-    @User() user: IUser,
+    @User() user?: IUser,
   ) {
     return this.resumesService.findAll(+currentPage, +limit, qs, user);
   }
 
   @Get(':id')
+  @Public()
   @ResponseMessage('Get a resume by id')
   findOne(@Param('id') id: string) {
     return this.resumesService.findOne(id);

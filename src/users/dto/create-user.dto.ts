@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsEmail,
@@ -5,6 +6,7 @@ import {
   IsNotEmpty,
   IsNotEmptyObject,
   IsObject,
+  IsString,
   ValidateNested,
 } from 'class-validator';
 import mongoose from 'mongoose';
@@ -68,4 +70,16 @@ export class RegisterUserDto {
 
   @IsNotEmpty({ message: 'Address không được để trống' })
   address: string;
+}
+
+export class UserLoginDto {
+  @IsString({ message: 'Username phải là một chuỗi' })
+  @IsNotEmpty({ message: 'Username không được để trống' })
+  @ApiProperty({ example: 'admin@gmail.com', description: 'Username' })
+  readonly username: string;
+
+  @IsString()
+  @IsNotEmpty({ message: 'Password không được để trống' })
+  @ApiProperty({ example: '123456', description: 'Password' })
+  readonly password: string;
 }

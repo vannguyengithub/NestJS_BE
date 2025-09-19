@@ -14,7 +14,10 @@ import { UpdateJobDto } from './dto/update-job.dto';
 import { Public, ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
 import { IJob } from './jobs.interface';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('jobs')
+@ApiBearerAuth()
 @Controller('jobs')
 export class JobsController {
   constructor(private readonly jobsService: JobsService) {}
@@ -26,12 +29,13 @@ export class JobsController {
   }
 
   @Get()
+  @Public()
   @ResponseMessage('Get list job with pagination')
   findAll(
     @Query('current') currentPage: string,
     @Query('pageSize') limit: string,
     @Query() qs: string,
-    @User() user: IUser,
+    @User() user?: IUser,
   ) {
     return this.jobsService.findAll(+currentPage, +limit, qs, user);
   }

@@ -34,9 +34,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       context.getHandler(),
       context.getClass(),
     ]);
-    if (isPublic) {
-      return true;
-    }
+    console.log('<<isPublic>>', isPublic);
+    // Always try to authenticate, but for public routes we'll handle missing auth in handleRequest
     return super.canActivate(context);
   }
 
@@ -49,12 +48,27 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     console.log('<<info>>', info);
     const request: RequestWithRoute = context.switchToHttp().getRequest();
 
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
     const isSkipCheckPermission = this.reflector.getAllAndOverride<boolean>(
       IS_PUBLIC_PERMISSION,
       [context.getHandler(), context.getClass()],
     );
 
-    // You can throw an exception based on either "info" or "err" arguments
+    // For public endpoints, allow access without authentication
+    if (isPublic) {
+      // If there's a valid user (token provided and valid), return it
+      // If no token or invalid token, return null but don't throw error
+      if (err || !user) {
+        return null as TUser; // Allow public access without authentication
+      }
+      return user as TUser; // Return authenticated user for public endpoint
+    }
+
+    // For private endpoints, require authentication
     if (err || !user) {
       throw (
         err ||

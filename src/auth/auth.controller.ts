@@ -11,11 +11,14 @@ import { AuthService } from './auth.service';
 import { Public, ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
 import { LocalAuthGuard } from './local-auth.guard';
-import { RegisterUserDto } from 'src/users/dto/create-user.dto';
+import { RegisterUserDto, UserLoginDto } from 'src/users/dto/create-user.dto';
 import { Response, Request } from 'express';
 import { RolesService } from 'src/roles/roles.service';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('auth')
+@ApiBearerAuth()
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -28,6 +31,7 @@ export class AuthController {
   @UseGuards(ThrottlerGuard)
   @ResponseMessage('User login')
   @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @ApiBody({ type: UserLoginDto })
   @Post('/login')
   handleLogin(
     @Req() req: Request & { user: IUser },
